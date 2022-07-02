@@ -39,10 +39,10 @@ class RenogyBattery(minimalmodbus.Instrument):
 
     def get_array(self, reg_base, dp, signed=False):
         count = self.read_register(reg_base)
-        elements = []
+        elements = {}
         start = reg_base + 1
         for register in range(start, start + count):
-            elements.append(self.read_register(register, dp, signed=signed))
+            elements["cell_{}".format(register-start+1)] = (self.read_register(register, dp, signed=signed))
         return elements
 
     def cell_voltages(self):
@@ -107,14 +107,20 @@ class RenogyBattery(minimalmodbus.Instrument):
             alarm = self.quad_bits(value)
             value = value >> 2
             alarm_array.append(alarm)
-        return alarm_array
+        return alarm_array, value
 
     def quad_bits_for_names(self, reg_base, names):
-        values = self.quad_bits_alarm(reg_base)
-        retval = {}
-        for i in range(0,len(names)):
-            retval[names[i]] = values[i]
-        return retval
+        values, value = self.quad_bits_alarm(reg_base)
+        ret_val = {}
+        for i in range(0, len(names)):
+            ret_val[names[i]] = values[i]
+
+        keys = list(ret_val.keys())
+        for i in keys:
+            if i.startswith("reserved_"):
+                ret_val.pop(i)
+        ret_val["_value"] = value
+        return ret_val
 
     def name_cells(self, is_v=True):
         names = []
@@ -122,8 +128,8 @@ class RenogyBattery(minimalmodbus.Instrument):
         if not is_v:
             reg = self.CELL_TEMP_BASE
         count = self.read_register(reg)
-        for i in range(0, count)
-            names = "cell_{}".format(i+1)
+        for i in range(0, count):
+            names.append("cell_{}".format(i+1))
         return names
 
     def cell_voltage_alarm(self):
@@ -149,6 +155,11 @@ class RenogyBattery(minimalmodbus.Instrument):
             ret_val[keys[i]] = result
             value = value >> 1
 
+        keys = list(ret_val.keys())
+        for i in keys:
+            if i.startswith("reserved_"):
+                ret_val.pop(i)
+        ret_val["_value"] = value
         return ret_val
 
     def status_one(self):
