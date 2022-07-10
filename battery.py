@@ -144,7 +144,7 @@ class RenogyBattery(minimalmodbus.Instrument):
         prefixes = ["reserved_0", "reserved_1", "reserved_2", "reserved_3", "reserved_4", "reserved_5", "reserved_6",
                     "reserved_7", "reserved_8", "discharge_current", "charge_current", "heater_temperature_2",
                     "heater_temperature_1", "environment_temperature_2", "environment_temperature_1", "bms_temperature"]
-        #TODO: probably remove reserved_ items.
+
         return self.quad_bits_for_names(self.OTHER_ALARMS, prefixes)
 
     def name_status_bits(self, reg, keys):
@@ -175,7 +175,6 @@ class RenogyBattery(minimalmodbus.Instrument):
                     "buzzer_on", "reserved_9", "reserved_10", "fully_charged",
                     "reserved_12", "heater_on", "effective_discharge_current", "effective_charge_current"]
 
-        #TODO: probably remove reserved_ items.
         return self.name_status_bits(self.STATUS_TWO, statuses)
 
     def status_three(self):
